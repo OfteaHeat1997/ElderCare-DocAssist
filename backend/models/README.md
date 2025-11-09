@@ -1,75 +1,74 @@
-# AI Models Directory
+# AI Models
 
-This directory contains AI model files (NOT included in git).
+Local AI models for speech-to-text and text generation. Everything runs on your computer (privacy-safe, no cloud!).
 
-## Required Models
+## What's Here
 
-### Whisper (Speech-to-Text) - Dutch Language
-- Download models from: https://huggingface.co/ggerganov/whisper.cpp/tree/main
-  (Go to the "Files and versions" section and download the desired model file)
-- Place in: `whisper/`
-- **Recommended for Dutch**: `ggml-base.bin` or `ggml-small.bin`
-  - `base`: Good accuracy, faster processing
-  - `small`: Better accuracy for medical terms
-  - `medium`: Best accuracy (larger, slower)
-- Whisper supports multilingual transcription including Dutch
-- All processing on-device (privacy-safe)
+### ✅ Whisper (Speech-to-Text) - READY!
+Converts Dutch audio to text.
 
-- Speech Recognition: Whisper / Google Speech-to-Text API (for Dutch and multilingual ASR)
+**Location:** `whisper/ggml-base.bin` (142MB) - **Already downloaded!**
 
-### Ollama (SOAP Generation)
-# Models Directory
+**What it does:**
+- Listens to audio recordings in Dutch
+- Converts speech to text
+- Works offline (no internet needed)
+- Good accuracy for medical terms
 
-## Overview
+### 📦 Ollama (Text Generation) - TODO
+Generates SOAP notes from transcribed text.
 
-This directory contains configuration files and resources for running and managing local Large Language Models (LLMs) using [Ollama](https://ollama.ai). These models are used by the ElderCare-DocAssist backend to provide natural language processing capabilities, such as summarization, question answering, and document analysis.
+**Installation needed:**
+1. Download from: https://ollama.ai/download
+2. Install Ollama
+3. Run: `ollama pull llama2` or `ollama pull mistral`
 
-## Installation
+**What it does:**
+- Takes transcribed text
+- Generates structured SOAP notes (Subjective, Objective, Assessment, Plan)
+- Suggests medical documentation
 
-1. **Install Ollama**
+## How to Use
 
-   Download and install Ollama from the [official website](https://ollama.ai/download) for your operating system.
+### For Frontend Developers
+Your React Native app will:
+1. Record audio → Save as `.wav` or `.mp3`
+2. Send to Whisper model → Get text back
+3. Send text to Ollama → Get SOAP note structure
 
-2. **Start Ollama**
+### For Backend Developers
+You need to integrate:
+1. **Whisper.cpp** - For running the speech-to-text model
+2. **Ollama API** - For generating SOAP notes
 
-   After installation, start the Ollama service:
+## Quick Test (Optional)
 
-   - On Windows: Run `ollama serve` in a terminal.
-   - On macOS/Linux: Run `ollama serve` in a terminal.
+Want to test if Whisper works?
 
-3. **Pull Required Models**
+1. Install whisper.cpp:
+   - Windows: Download from https://github.com/ggerganov/whisper.cpp/releases
+   - macOS: `brew install whisper-cpp`
+   - Linux: `sudo apt-get install whisper-cpp`
 
-   Use the following commands to download the required models:
-
-   ```sh
-   ollama pull llama2
-   ollama pull mistral
-   # Add more models as needed
+2. Test with audio file:
+   ```bash
+   whisper-cpp -m backend/models/whisper/ggml-base.bin -f your-audio.wav
    ```
 
-## Available Models
+## File Structure
 
-The following models are used or supported in this project:
+```
+models/
+├── whisper/
+│   └── ggml-base.bin          ✅ Downloaded (142MB)
+├── ollama/                     (config files, empty for now)
+├── prompts/                    (SOAP generation templates)
+└── test_audio/                 (sample audio files for testing)
+```
 
-- **llama2**: General-purpose LLM for conversation and summarization.
-- **mistral**: Lightweight, fast LLM for quick responses.
+## Important Notes
 
-You can add or update models by editing the configuration files in this directory and pulling new models with Ollama.
-
-## Usage
-
-Once Ollama is running and the required models are pulled, the backend will automatically connect to the Ollama service to perform inference tasks.
-
-Example usage in the backend (pseudocode):
-
-- Models to pull: `llama2` or `mistral`
-- Config files go in: `ollama/`
-
-## Test Audio
-- Place synthetic test files in: `test_audio/`
-- Format: .wav, .mp3
-- Keep files small (<1MB)
-
-## Prompts
-- SOAP generation templates in: `prompts/`
-- Follow V&VN nursing standards
+- ✅ Whisper model is already downloaded and ready!
+- ⚠️ Models are NOT in git (too big, in .gitignore)
+- 🔒 Everything runs locally (privacy-first)
+- 🇳🇱 Whisper supports Dutch language
