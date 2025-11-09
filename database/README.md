@@ -51,17 +51,39 @@ sudo apt-get install sqlcipher
 ```
 
 **Create encrypted database:**
+
+**IMPORTANT:** For SQLCipher, `PRAGMA key` MUST be the first statement after opening the database.
+
 ```bash
+# Open SQLCipher CLI
 sqlcipher database/eldercare.db
 ```
 
-Then in the SQLCipher prompt:
+Then in the SQLCipher prompt (in this exact order):
 ```sql
-PRAGMA key='YourStrongPassword_OnlyForPilot!';
-PRAGMA journal_mode=WAL;
+-- MUST be first statement for SQLCipher databases
+PRAGMA key = 'YourStrongPassword_OnlyForPilot!';
+
+-- Now enable foreign keys and other settings
+PRAGMA foreign_keys = ON;
+PRAGMA journal_mode = WAL;
+
+-- Load schema
 .read database/schema.sql
+
+-- Verify tables created
 .tables
+
+-- Exit
 .quit
+```
+
+**For GUI tools with SQLCipher support:**
+```sql
+.open C:\Users\maria\Desktop\projects\ElderCare-DocAssist\database\eldercare.db
+PRAGMA key = 'your_passphrase';   -- must be first statement
+PRAGMA foreign_keys = ON;
+-- now run schema / introspect
 ```
 
 **Note:** Most GUI tools can't open encrypted databases. Use SQLCipher CLI or configure your app with the encryption key.
