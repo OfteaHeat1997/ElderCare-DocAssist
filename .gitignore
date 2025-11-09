@@ -1,0 +1,20 @@
+# node / rn
+node_modules/
+*.log
+.expo/
+android/build/
+ios/build/
+
+# env & secrets
+.env
+**/.env
+**/.env.local
+
+# models (big files – keep local only)
+backend/models/**
+!backend/models/README.md
+
+# os/editor junk
+.DS_Store
+Thumbs.db
+.idea/
