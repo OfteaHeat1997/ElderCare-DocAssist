@@ -57,7 +57,7 @@ CREATE INDEX IF NOT EXISTS idx_vitals_note_id ON vitals(note_id);
 CREATE TRIGGER IF NOT EXISTS trg_notes_updated_at
 AFTER UPDATE ON notes
 FOR EACH ROW
-WHEN NEW.updated_at = OLD.updated_at
+WHEN NEW.updated_at IS NULL OR NEW.updated_at = OLD.updated_at
 BEGIN
     UPDATE notes
     SET updated_at = CURRENT_TIMESTAMP
