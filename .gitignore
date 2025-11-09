@@ -14,6 +14,12 @@ ios/build/
 backend/models/**
 !backend/models/README.md
 
+# database files (contain patient data – keep local only)
+*.db
+*.db-shm
+*.db-wal
+database/*.db*
+
 # os/editor junk
 .DS_Store
 Thumbs.db
