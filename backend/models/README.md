@@ -15,6 +15,8 @@ This directory contains AI model files (NOT included in git).
 - Whisper supports multilingual transcription including Dutch
 - All processing on-device (privacy-safe)
 
+- Speech Recognition: Whisper / Google Speech-to-Text API (for Dutch and multilingual ASR)
+
 ### Ollama (SOAP Generation)
 # Models Directory
 

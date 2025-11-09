@@ -18,6 +18,7 @@ backend/models/**
 *.db
 *.db-shm
 *.db-wal
+*.sqlite
 database/*.db*
 
 # os/editor junk
