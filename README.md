@@ -34,6 +34,20 @@ Privacy-first mobile app that helps nurses document care using:
 
 ## Quick Start
 
+**With Docker (Recommended):**
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Open database viewer in browser
+http://localhost:8080
+```
+
+See `QUICK_START.md` for full guide or `DOCKER_SETUP.md` for details.
+
+**Manual Setup:**
+
 1. Clone the repository
 2. See `frontend/.env.example` for app configuration
 3. See `backend/.env.example` for AI model setup

@@ -1,0 +1,71 @@
+# ElderCare-DocAssist - Docker Compose
+# Simple setup for student project
+
+services:
+  # Backend API (Node.js + Whisper integration)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eldercare-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      # Share database with host
+      - ./database:/app/database
+      # Share Whisper models
+      - ./backend/models:/app/models
+      # Share backend code (for development)
+      - ./backend:/app
+    environment:
+      - NODE_ENV=development
+      - OFFLINE=1
+      - OLLAMA_HOST=http://ollama:11434
+      - WHISPER_MODEL_PATH=/app/models/whisper/ggml-base.bin
+    networks:
+      - eldercare-network
+    # Only start if you have backend server code
+    # Remove this line once you build the API
+    command: echo "Backend ready - add your API server code!"
+
+  # Database GUI Viewer (SQLite Web)
+  db-viewer:
+    image: coleifer/sqlite-web
+    container_name: eldercare-db-viewer
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./database:/data
+    environment:
+      - SQLITE_DATABASE=/data/eldercare_dev.db
+    networks:
+      - eldercare-network
+    restart: unless-stopped
+
+  # Ollama (for SOAP note generation)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: eldercare-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist Ollama models
+      - ollama-data:/root/.ollama
+    networks:
+      - eldercare-network
+    # Uncomment to use GPU (if available)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+networks:
+  eldercare-network:
+    driver: bridge
+
+volumes:
+  # Persist Ollama models between restarts
+  ollama-data:
