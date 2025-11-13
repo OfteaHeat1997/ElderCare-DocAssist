@@ -23,7 +23,7 @@ function askOllama(prompt) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': data.length
+        'Content-Length': Buffer.byteLength(data)
       }
     };
 
@@ -35,6 +35,12 @@ function askOllama(prompt) {
       res.on('end', () => {
         try {
           const response = JSON.parse(body);
+
+          if (response.error) {
+            reject(new Error(response.error));
+            return;
+          }
+
           resolve(response.response);
         } catch (e) {
           reject(e);
@@ -59,22 +65,18 @@ Complaints: Headache, dizzy
 Vitals: BP 140/85, Temp 37.2°C, HR 78
 `;
 
-  const prompt = `You are a nursing assistant writing medical documentation. Create a SOAP note from this information.
+  const prompt = `You are a documentation assistant helping nurses organize their notes. This is NOT medical advice - you are only reformatting information that a nurse has already collected.
 
-SOAP means:
-- S (Subjective): What the patient reports/feels
-- O (Objective): Vital signs and observations
-- A (Assessment): Your medical assessment
-- P (Plan): Care plan
-
-Patient information:
+The nurse observed the following:
 ${nurseInput}
 
-Write the SOAP note in this exact format:
-S:
-O:
-A:
-P:`;
+Please organize this information into a structured SOAP note format:
+S: (What the patient said/reported)
+O: (Vital signs and measurements the nurse recorded)
+A: (Brief summary of the situation)
+P: (What the nurse plans to do next)
+
+Format the nurse's observations into these four sections:`;
 
   try {
     console.log("Input:");

@@ -1,0 +1,57 @@
+/* Simple Recording Screen - Student Level */
+
+.back-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+}
+
+.patient-info {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin: 20px 0;
+}
+
+.patient-info h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.patient-info p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.record-button {
+  width: 100%;
+  padding: 30px;
+  font-size: 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.record-button:hover {
+  background-color: #c0392b;
+}
+
+.record-button.recording {
+  background-color: #95a5a6;
+}
+
+.record-button.recording:hover {
+  background-color: #7f8c8d;
+}
