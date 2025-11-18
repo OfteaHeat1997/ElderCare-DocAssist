@@ -1,0 +1,417 @@
+openapi: 3.0.3
+info:
+  title: VoiceVerzorging API
+  description: |
+    API for the VoiceVerzorging MVP - a healthcare documentation assistant that converts 
+    speech to structured clinical notes for elderly care professionals.
+  version: 1.0.0
+  contact:
+    name: VoiceVerzorging Team
+    email: team@voiceverzorging.nl
+
+servers:
+  - url: https://api.voiceverzorging.nl/v1
+    description: Production server
+  - url: https://staging-api.voiceverzorging.nl/v1
+    description: Staging server
+  - url: http://localhost:3000/v1
+    description: Local development server
+
+tags:
+  - name: patients
+    description: Patient management operations
+  - name: transcription
+    description: Audio recording and transcription operations
+  - name: documentation
+    description: Clinical documentation operations
+
+paths:
+  /patients:
+    get:
+      tags:
+        - patients
+      summary: Get list of patients
+      description: Retrieve a list of all patients assigned to the healthcare worker
+      operationId: getPatients
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of patients to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of patients to skip
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Patient'
+                  total:
+                    type: integer
+                    description: Total number of patients
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+  /patients/{patientId}:
+    get:
+      tags:
+        - patients
+      summary: Get patient details
+      description: Retrieve detailed information about a specific patient
+      operationId: getPatientById
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Unique identifier of the patient
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+
+  /transcription/start:
+    post:
+      tags:
+        - transcription
+      summary: Start audio recording session
+      description: Initialize a new audio recording and transcription session for a patient visit
+      operationId: startRecording
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+              properties:
+                patientId:
+                  type: string
+                  format: uuid
+                  description: ID of the patient for this recording
+                visitType:
+                  type: string
+                  enum: [medication, wound_care, daily_activities, therapy, general]
+                  description: Type of care visit being documented
+      responses:
+        '201':
+          description: Recording session started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier for this recording session
+                  patientId:
+                    type: string
+                    format: uuid
+                  startedAt:
+                    type: string
+                    format: date-time
+                  status:
+                    type: string
+                    enum: [recording]
+
+  /transcription/{sessionId}/audio:
+    post:
+      tags:
+        - transcription
+      summary: Upload audio chunk
+      description: Upload audio data for real-time or batch transcription
+      operationId: uploadAudioChunk
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Recording session identifier
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          audio/wav:
+            schema:
+              type: string
+              format: binary
+          audio/webm:
+            schema:
+              type: string
+              format: binary
+          audio/mp3:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Audio chunk processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcription:
+                    type: string
+                    description: Partial or complete transcription text from Whisper
+                  confidence:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                    description: Confidence score of the transcription
+
+  /transcription/{sessionId}/complete:
+    post:
+      tags:
+        - transcription
+      summary: Complete recording session
+      description: Finalize the recording and get the complete transcription
+      operationId: completeRecording
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recording completed and transcription ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transcription'
+
+  /documentation/generate:
+    post:
+      tags:
+        - documentation
+      summary: Generate structured documentation
+      description: Generate structured clinical documentation from transcription text
+      operationId: generateDocumentation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transcriptionId
+              properties:
+                transcriptionId:
+                  type: string
+                  format: uuid
+                  description: ID of the transcription to process
+                documentationType:
+                  type: string
+                  enum: [standard, medication, incident, handover]
+                  default: standard
+      responses:
+        '200':
+          description: Documentation generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalNote'
+
+  /documentation/{noteId}:
+    get:
+      tags:
+        - documentation
+      summary: Get clinical note
+      description: Retrieve a specific clinical note by ID
+      operationId: getClinicalNote
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalNote'
+
+  /documentation/{noteId}/approve:
+    post:
+      tags:
+        - documentation
+      summary: Approve clinical note
+      description: Approve the clinical note for final submission
+      operationId: approveClinicalNote
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Note approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  noteId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [approved]
+                  approvedAt:
+                    type: string
+                    format: date-time
+                  approvedBy:
+                    type: string
+                    description: Healthcare worker who approved the note
+
+components:
+  schemas:
+    Patient:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique patient identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        firstName:
+          type: string
+          description: Patient's first name
+          example: Maria
+        lastName:
+          type: string
+          description: Patient's last name
+          example: Peters
+
+    Transcription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        patientId:
+          type: string
+          format: uuid
+        transcriptionText:
+          type: string
+          description: Full transcription of the recorded audio
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        duration:
+          type: integer
+          description: Recording duration in seconds
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [processing, completed, failed]
+
+    ClinicalNote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patientId:
+          type: string
+          format: uuid
+        transcriptionId:
+          type: string
+          format: uuid
+        noteType:
+          type: string
+          enum: [standard, medication, incident, handover]
+        structuredData:
+          type: object
+          properties:
+            symptoms:
+              type: array
+              items:
+                type: string
+              example: [Normal blood pressure 130/80]
+            medications:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  dosage:
+                    type: string
+                  administered:
+                    type: boolean
+              example: 
+                - name: Metformin
+                  dosage: 500mg
+                  administered: true
+            observations:
+              type: string
+              example: Patient was alert and cooperative
+            interventions:
+              type: string
+              example: Administered morning medication via dispenser
+            response:
+              type: string
+              example: Patient understood medication instructions
+            nextSteps:
+              type: string
+              example: Next visit scheduled for Friday
+        rawTranscription:
+          type: string
+          description: Original transcription text from Whisper
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          description: Healthcare worker who created the note
+        status:
+          type: string
+          enum: [draft, pending_review, approved]
