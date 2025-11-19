@@ -3,6 +3,7 @@ import { Link } from "expo-router";
 import ResponsiveView from "../components/ResponsiveView";
 import ResponsiveText from "../components/ResponsiveText";
 import { responsiveSize, responsivePadding, isTablet } from "../lib/responsive";
+import { Ionicons } from "@expo/vector-icons"; // ← toegevoegd
 
 export default function HomeScreen() {
   return (
@@ -10,7 +11,7 @@ export default function HomeScreen() {
       {/* HEADER */}
       <View
         style={{
-          backgroundColor: "#FFD54F", // Gele header
+          backgroundColor: "#FFD54F",
           paddingVertical: responsiveSize(30, 50),
           paddingHorizontal: responsivePadding(),
           borderBottomLeftRadius: 20,
@@ -32,7 +33,6 @@ export default function HomeScreen() {
           justifyContent: "center",
         }}
       >
-        {/* Quick Actions Container */}
         <View
           style={{
             gap: responsiveSize(14, 22),
@@ -48,8 +48,11 @@ export default function HomeScreen() {
                 alignItems: "center",
               }}
             >
-              <ResponsiveText style={{ color: "white", fontWeight: "600" }}>
-                👤 Patiënt selecteren
+              <Ionicons name="person-outline" size={24} color="white" />
+              <ResponsiveText
+                style={{ color: "white", fontWeight: "600", marginTop: 6 }}
+              >
+                Patiënt selecteren
               </ResponsiveText>
             </TouchableOpacity>
           </Link>
@@ -64,8 +67,11 @@ export default function HomeScreen() {
                 alignItems: "center",
               }}
             >
-              <ResponsiveText style={{ color: "white", fontWeight: "600" }}>
-                🎤 Nieuwe opname
+              <Ionicons name="mic-outline" size={24} color="white" />
+              <ResponsiveText
+                style={{ color: "white", fontWeight: "600", marginTop: 6 }}
+              >
+                Nieuwe opname
               </ResponsiveText>
             </TouchableOpacity>
           </Link>
@@ -80,8 +86,11 @@ export default function HomeScreen() {
                 alignItems: "center",
               }}
             >
-              <ResponsiveText style={{ color: "white", fontWeight: "600" }}>
-                📄 Notities bekijken
+              <Ionicons name="document-text-outline" size={24} color="white" />
+              <ResponsiveText
+                style={{ color: "white", fontWeight: "600", marginTop: 6 }}
+              >
+                Notities bekijken
               </ResponsiveText>
             </TouchableOpacity>
           </Link>
