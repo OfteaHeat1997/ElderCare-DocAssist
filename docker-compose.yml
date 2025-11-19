@@ -3,31 +3,41 @@
 # Simple setup for student project
 
 services:
-  # Backend API (Node.js + Whisper integration)
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: eldercare-backend
+  # PostgreSQL Database
+  database:
+    image: postgres:16-alpine
+    container_name: eldercare-database
     ports:
-      - "3000:3000"
-    volumes:
-      # Share database with host
-      - ./database:/app/database
-      # Share Whisper models
-      - ./backend/models:/app/models
-      # Share backend code (for development)
-      - ./backend:/app
+      - "5432:5432"
     environment:
-      - NODE_ENV=development
-      - OFFLINE=1
-      - OLLAMA_HOST=http://ollama:11434
-      - WHISPER_MODEL_PATH=/app/models/whisper/ggml-base.bin
+      - POSTGRES_DB=voiceverzorging
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=eldercare2025
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - eldercare-network
-    # Only start if you have backend server code
-    # Remove this line once you build the API
-    command: echo "Backend ready - add your API server code!"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database Admin UI (pgAdmin)
+  db-admin:
+    image: dpage/pgadmin4:latest
+    container_name: eldercare-db-admin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@eldercare.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - eldercare-network
+    restart: unless-stopped
 
   # Database GUI Viewer (SQLite Web)
   db-viewer:
@@ -89,3 +99,5 @@ networks:
 volumes:
   # Persist Ollama models between restarts
   ollama-data:
+  postgres-data:
+  pgadmin-data:
