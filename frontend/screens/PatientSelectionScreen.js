@@ -43,14 +43,7 @@ export default function PatientSelectionScreen() {
       {/* Lijst */}
       <ScrollView>
         {filtered.map((p) => (
-          <Link
-            key={p.id}
-            href={{
-              pathname: "/record",
-              params: { id: p.id },
-            }}
-            asChild
-          >
+          <Link key={p.id} href={`/patient/${p.id}`} asChild>
             <PatientCard patient={p} />
           </Link>
         ))}
