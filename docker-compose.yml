@@ -8,7 +8,7 @@ services:
     image: postgres:16-alpine
     container_name: eldercare-database
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=voiceverzorging
       - POSTGRES_USER=postgres
@@ -39,20 +39,6 @@ services:
       - eldercare-network
     restart: unless-stopped
 
-  # Database GUI Viewer (SQLite Web)
-  db-viewer:
-    image: coleifer/sqlite-web
-    container_name: eldercare-db-viewer
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./database:/data
-    environment:
-      - SQLITE_DATABASE=/data/eldercare_dev.db
-    networks:
-      - eldercare-network
-    restart: unless-stopped
-
   # Ollama (for SOAP note generation)
   ollama:
     image: ollama/ollama:latest
@@ -72,6 +58,22 @@ services:
     #         - driver: nvidia
     #           count: 1
     #           capabilities: [gpu]
+
+  # Backend (Java Spring Boot)
+  backend:
+    build:
+      context: ./backend/voiceverzorging-backend
+      dockerfile: Dockerfile
+    container_name: eldercare-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - database
+    networks:
+      - eldercare-network
+    restart: unless-stopped
 
   # Frontend (React Web App)
   frontend:
