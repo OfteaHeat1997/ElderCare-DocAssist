@@ -1,6 +1,6 @@
 
-# ElderCare-DocAssist - Docker Compose
-# Simple setup for student project
+# ElderCare-DocAssist - Complete Docker Compose
+# Runs everything: Database, Backend (Java + Python Whisper), Frontend, Ollama
 
 services:
   # PostgreSQL Database
@@ -19,10 +19,47 @@ services:
       - eldercare-network
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Spring Boot Backend with Python Whisper
+  backend:
+    build:
+      context: ./backend/voiceverzorging-backend
+      dockerfile: Dockerfile
+    container_name: eldercare-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring profile
+      - SPRING_PROFILES_ACTIVE=docker
+
+      # Database connection (uses Docker service name)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/voiceverzorging
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=eldercare2025
+
+      # Whisper configuration
+      - WHISPER_PYTHON_PATH=python3
+      - WHISPER_SCRIPT_PATH=/app/whisper/transcribe.py
+      - WHISPER_TEMP_DIR=/app/models/temp
+    volumes:
+      # Persist Whisper models (prevents re-downloading 150MB)
+      - whisper-models:/root/.cache/whisper
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - eldercare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Database Admin UI (pgAdmin)
   db-admin:
@@ -31,24 +68,10 @@ services:
     ports:
       - "5050:80"
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@eldercare.local
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
       - PGADMIN_DEFAULT_PASSWORD=admin
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-    networks:
-      - eldercare-network
-    restart: unless-stopped
-
-  # Database GUI Viewer (SQLite Web)
-  db-viewer:
-    image: coleifer/sqlite-web
-    container_name: eldercare-db-viewer
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./database:/data
-    environment:
-      - SQLITE_DATABASE=/data/eldercare_dev.db
     networks:
       - eldercare-network
     restart: unless-stopped
@@ -64,6 +87,7 @@ services:
       - ollama-data:/root/.ollama
     networks:
       - eldercare-network
+    restart: unless-stopped
     # Uncomment to use GPU (if available)
     # deploy:
     #   resources:
@@ -88,6 +112,12 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      # Backend API URL (internal Docker network)
+      - REACT_APP_API_URL=http://backend:8080
+      # For browser access (external)
+      - REACT_APP_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - backend
     networks:
       - eldercare-network
     restart: unless-stopped
@@ -97,7 +127,14 @@ networks:
     driver: bridge
 
 volumes:
-  # Persist Ollama models between restarts
-  ollama-data:
+  # PostgreSQL data persistence
   postgres-data:
+
+  # pgAdmin settings persistence
   pgadmin-data:
+
+  # Ollama models persistence
+  ollama-data:
+
+  # Whisper models persistence (prevents re-downloading)
+  whisper-models:
