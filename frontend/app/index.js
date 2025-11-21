@@ -58,7 +58,7 @@ export default function HomeScreen() {
           </Link>
 
           {/* QUICK ACTION 2 */}
-          <Link href="/record" asChild>
+          {/* <Link href="/record" asChild>
             <TouchableOpacity
               style={{
                 backgroundColor: "#E53935",
@@ -74,10 +74,10 @@ export default function HomeScreen() {
                 Nieuwe opname
               </ResponsiveText>
             </TouchableOpacity>
-          </Link>
+          </Link> */}
 
           {/* QUICK ACTION 3 */}
-          <Link href="/review" asChild>
+          {/* <Link href="/review" asChild>
             <TouchableOpacity
               style={{
                 backgroundColor: "#8E24AA",
@@ -93,7 +93,7 @@ export default function HomeScreen() {
                 Notities bekijken
               </ResponsiveText>
             </TouchableOpacity>
-          </Link>
+          </Link> */}
         </View>
       </ResponsiveView>
     </View>
