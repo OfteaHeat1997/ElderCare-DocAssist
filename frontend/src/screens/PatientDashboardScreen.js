@@ -161,7 +161,7 @@ function PatientDashboardScreen({ patient, onBack, onStartRecording }) {
 
       {/* Start Recording Button */}
       <button className="record-action-button" onClick={onStartRecording}>
-        <span className="record-icon">⏺</span>
+        <span className="record-icon">REC</span>
       </button>
     </div>
   );

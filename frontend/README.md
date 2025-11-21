@@ -1,115 +1,191 @@
-# ElderCare Frontend
+# Frontend Documentation
 
-React web application for the ElderCare DocAssist project.
+## Overview
+React web application for ElderCare voice documentation system.
 
-## What's Inside
+## File Structure Explanation
 
-- **Screen 1: Patient Selection** - Search and select from 10 fake patients
-- **Screen 2: Recording Screen** - Big red button to record notes (placeholder for Whisper integration)
+### `/src/App.js`
+Main application component that manages navigation between screens.
 
-## Fake Patients (Hardcoded)
+**What it does:**
+- Manages which screen is currently visible (patient list, dashboard, or recording)
+- Stores selected patient data
+- Handles navigation between screens
 
-The app includes 10 fake Dutch elderly care patients:
-- Jan de Vries (ID: 0001)
-- Maria Jansen (ID: 0002)
-- Piet Bakker (ID: 0003)
-- Anna van Dijk (ID: 0004)
-- Henk Visser (ID: 0005)
-- Els Smit (ID: 0006)
-- Johan Mulder (ID: 0007)
-- Greet de Jong (ID: 0008)
-- Kees van Beek (ID: 0009)
-- Truus Willems (ID: 0010)
+**Key state variables:**
+- `currentScreen`: Tracks which screen to show ('selection', 'dashboard', 'recording')
+- `selectedPatient`: Stores the patient object when a patient is clicked
 
-**No database connection needed!** The data is in `src/data/fakePatients.js`
+### `/src/screens/PatientSelectionScreen.js`
+Displays list of all patients from the backend database.
 
-## How to Run
+**What it does:**
+- Fetches patient list from backend API when component loads
+- Displays patients in a grid with cards
+- Shows patient initials, name, and age
+- Handles click events to select a patient
 
-### Option 1: With Docker (Recommended)
+**API Call:**
+- Uses `getPatients()` from `api.js`
+- Called in `useEffect` hook on component mount
 
-From project root:
+### `/src/screens/PatientDashboardScreen.js`
+Shows detailed information about a selected patient.
 
-```bash
-# Build and start frontend
-docker-compose up -d frontend
+**What it does:**
+- Displays patient avatar with initials
+- Shows patient details (DOB, age, ID, address)
+- Displays mock medical information (history, medications, allergies)
+- Has a record button that navigates to recording screen
 
-# Check if it's running
-docker ps | grep eldercare-frontend
+**Helper functions:**
+- `getInitials()`: Creates initials from first/last name (e.g., "Jan de Vries" → "JV")
+- `calculateAge()`: Calculates age from date of birth
+- `formatPatientDetails()`: Formats patient info into display string
 
-# View logs
-docker logs eldercare-frontend
-```
+### `/src/screens/RecordingScreen.js`
+Handles audio recording and transcription via Whisper.
 
-Open in browser: **http://localhost:3001**
+**What it does:**
+1. Records audio from user's microphone using browser MediaRecorder API
+2. When stopped, sends audio to backend for transcription
+3. Displays transcription result on screen
+4. Shows modal popup while processing
 
-### Option 2: Without Docker (Local Development)
+**State variables:**
+- `isRecording`: Boolean, true when actively recording
+- `isProcessing`: Boolean, true when sending audio to Whisper
+- `transcription`: String, the transcribed text from Whisper
+- `status`: String, current status message
+- `mediaRecorderRef`: Reference to MediaRecorder instance
+- `audioChunksRef`: Array storing audio data chunks
 
-```bash
-cd frontend
+**Flow:**
+1. User clicks "Start Recording"
+   - Browser requests microphone permission
+   - MediaRecorder starts capturing audio
+   - Audio chunks are stored in `audioChunksRef`
 
-# Install dependencies
-npm install
+2. User clicks "Stop Recording"
+   - MediaRecorder stops
+   - Audio chunks are combined into a Blob
+   - Modal popup appears with spinner
+   - Audio is sent to backend via `transcribeAudio()` API call
+   - Backend uses Whisper to transcribe
+   - Transcription text is displayed
 
-# Start development server
-npm start
-```
+### `/src/services/api.js`
+Contains all backend API calls.
 
-Open in browser: **http://localhost:3001**
+**Backend URL:** `http://localhost:8080/v1`
 
-## File Structure
+**Functions:**
 
-```
-frontend/
-├── public/
-│   └── index.html                  # HTML template
-├── src/
-│   ├── data/
-│   │   └── fakePatients.js        # 10 fake patients
-│   ├── screens/
-│   │   ├── PatientSelectionScreen.js   # Screen 1
-│   │   ├── PatientSelectionScreen.css
-│   │   ├── RecordingScreen.js          # Screen 2
-│   │   └── RecordingScreen.css
-│   ├── App.js                     # Main app (navigation)
-│   └── index.js                   # Entry point
-├── Dockerfile                     # Docker configuration
-└── package.json                   # Dependencies
-```
+1. `getPatients()`
+   - Endpoint: `GET /v1/patients`
+   - Returns: Array of patient objects
+   - Used by: PatientSelectionScreen
 
-## Features Working Now
+2. `getPatient(patientId)`
+   - Endpoint: `GET /v1/patients/{id}`
+   - Returns: Single patient object
+   - Used by: (Future feature)
 
-- [x] Patient search by name, ID, or room
-- [x] Patient selection
-- [x] Navigate to recording screen
-- [x] Display patient info
-- [x] Big record button (visual only)
-- [x] Back navigation
+3. `transcribeAudio(audioBlob, patientId)`
+   - Endpoint: `POST /v1/transcriptions`
+   - Sends: Audio file as FormData
+   - Returns: Object with `text` field containing transcription
+   - Used by: RecordingScreen
 
-## Features Coming Later
+4. Session-based functions (not currently used):
+   - `startRecording()`: Start a recording session
+   - `uploadAudio()`: Upload audio chunks during recording
+   - `completeRecording()`: Finish session and get transcription
+   - `generateSOAPNote()`: Generate SOAP note from transcription (future)
 
-- [ ] Connect to Whisper (speech-to-text)
-- [ ] Connect to Ollama (SOAP note generation)
-- [ ] Connect to backend API (when ready)
-- [ ] Save notes to database
-- [ ] Review and edit screen
+## CSS Files
 
-## Ports
+### `/src/App.css`
+Global styles and base layout. Contains responsive design breakpoints.
 
-- Frontend: **http://localhost:3001**
-- Backend API: **http://localhost:3000** (not built yet)
-- Database Viewer: **http://localhost:8080**
-- Ollama API: **http://localhost:11434**
+### `/src/screens/PatientSelectionScreen.css`
+Styles for patient list grid and patient cards.
 
-## For Your Team
+### `/src/screens/PatientDashboardScreen.css`
+Styles for patient dashboard layout, info grid, and medical data display.
 
-Everyone can run the frontend:
+### `/src/screens/RecordingScreen.css`
+Styles for recording button, status messages, modal popup, and spinner animation.
 
-```bash
-# Start everything
-docker-compose up -d
+## Important Notes for Development
 
-# Open browser
-# Go to http://localhost:3001
-```
+### Adding a New Screen
+1. Create `NewScreen.js` in `/src/screens/`
+2. Create `NewScreen.css` in `/src/screens/`
+3. Import in `App.js`: `import NewScreen from './screens/NewScreen';`
+4. Add new state value to `currentScreen` state
+5. Add conditional rendering in App.js return statement
 
-That's it! The frontend works without backend or database.
+### Adding a New API Call
+1. Open `/src/services/api.js`
+2. Add new async function following existing pattern:
+   ```javascript
+   export const newApiCall = async (params) => {
+     try {
+       const response = await fetch(`${API_BASE_URL}/endpoint`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(params)
+       });
+       if (!response.ok) {
+         throw new Error('Failed to...');
+       }
+       return await response.json();
+     } catch (error) {
+       console.error('Error:', error);
+       throw error;
+     }
+   };
+   ```
+3. Import in component: `import { newApiCall } from '../services/api';`
+
+### Browser Microphone Permissions
+- First time: Browser will ask for microphone permission
+- User must click "Allow" to enable recording
+- If "Block" is clicked, recording will fail
+- To reset permissions: Browser settings → Site settings → Microphone
+
+### Hot Reload Not Working
+If changes don't appear after editing:
+1. Stop containers: `docker-compose down`
+2. Rebuild: `docker-compose up -d --build frontend`
+3. Hard refresh browser: Ctrl + Shift + R
+
+## Common Issues
+
+### "Failed to fetch patients"
+- Backend is not running
+- Check: `docker ps | grep backend`
+- Fix: `docker restart eldercare-backend`
+
+### "Failed to transcribe audio"
+- Whisper model not downloaded yet (first time takes 10-20s)
+- Backend error processing audio
+- Check logs: `docker logs eldercare-backend`
+
+### Recording button not working
+- Microphone permissions blocked
+- Browser doesn't support MediaRecorder (use Chrome/Firefox)
+- Check browser console (F12) for errors
+
+## Next Steps for Development
+
+1. Save transcriptions to database (need Tim to add backend endpoint)
+2. Add SOAP note generation from transcription
+3. Add edit functionality for SOAP notes
+4. Add save/export SOAP notes
+5. Add user authentication
+6. Add search/filter for patients
+7. Add pagination for patient list
+8. Make fully mobile responsive

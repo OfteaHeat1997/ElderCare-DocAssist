@@ -6,6 +6,7 @@ function RecordingScreen({ patient, onBack }) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [status, setStatus] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -32,8 +33,13 @@ function RecordingScreen({ patient, onBack }) {
   };
 
   const handleStopRecording = async () => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+      return;
+    }
+
     mediaRecorderRef.current.stop();
     setIsRecording(false);
+    setIsProcessing(true);
     setStatus('Processing audio...');
 
     mediaRecorderRef.current.onstop = async () => {
@@ -47,7 +53,8 @@ function RecordingScreen({ patient, onBack }) {
         const result = await transcribeAudio(audioBlob, patient.id);
 
         setTranscription(result.text || result.transcriptionText || 'No transcription available');
-        setStatus('Complete!');
+        setStatus('Transcription Complete!');
+        setIsProcessing(false);
 
         // Clean up
         audioChunksRef.current = [];
@@ -59,6 +66,7 @@ function RecordingScreen({ patient, onBack }) {
       } catch (error) {
         console.error('Error processing recording:', error);
         setStatus('Error: ' + error.message);
+        setIsProcessing(false);
       }
     };
   };
@@ -77,14 +85,26 @@ function RecordingScreen({ patient, onBack }) {
       <button
         onClick={isRecording ? handleStopRecording : handleStartRecording}
         className={isRecording ? "record-button recording" : "record-button"}
-        disabled={!!status && status !== 'Complete!'}
+        disabled={isProcessing}
       >
-        {isRecording ? '⏹ Stop Recording' : '⏺ Start Recording'}
+        {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
 
-      {status && (
+      {status && !isProcessing && (
         <div className="status">
           <p>{status}</p>
+        </div>
+      )}
+
+      {/* Processing Modal Pop-up */}
+      {isProcessing && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="spinner"></div>
+            <h2>Processing Audio</h2>
+            <p>{status}</p>
+            <p className="modal-subtext">Whisper is transcribing your recording...</p>
+          </div>
         </div>
       )}
 
