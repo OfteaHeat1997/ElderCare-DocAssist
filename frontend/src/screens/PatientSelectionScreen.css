@@ -1,0 +1,374 @@
+/* ElderCare Patient Selection Screen */
+
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 834px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0;
+  background: #EEEEEE;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.screen-header {
+  width: 100%;
+  height: 132px;
+  background: #F7BD00;
+  display: flex;
+  align-items: center;
+  padding: 0 48px;
+  margin-bottom: 30px;
+}
+
+.screen-header h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 48px;
+  line-height: 58px;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+/* Patient List */
+.patient-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 31px 40px;
+}
+
+/* Patient Card/Button */
+.patient-button {
+  position: relative;
+  width: 100%;
+  height: 202px;
+  background: #FFFFFF;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 40px 30px;
+  gap: 27px;
+}
+
+.patient-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.patient-button:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Avatar Circle */
+.patient-avatar {
+  width: 121px;
+  height: 121px;
+  background: #FFBDBD;
+  border-radius: 61px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.patient-avatar-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 58px;
+  color: #8F2121;
+}
+
+/* Patient Info */
+.patient-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.patient-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 39px;
+  color: #081DA6;
+  margin: 0;
+}
+
+.patient-details {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 19px;
+  color: #252525;
+  margin: 0;
+}
+
+/* Tags */
+.patient-tags {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.patient-tag {
+  height: 35px;
+  padding: 0 16px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 17px;
+}
+
+.patient-tag.green {
+  background: #CBFFC9;
+  color: #066803;
+}
+
+.patient-tag.red {
+  background: #FFBDBD;
+  color: #8F2121;
+}
+
+.patient-tag.yellow {
+  background: #FFEDB6;
+  color: #8A6900;
+}
+
+/* Loading state */
+.screen.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.screen.loading h1 {
+  text-align: center;
+  color: #2C3E50;
+  font-size: 24px;
+}
+
+/* Error state */
+.screen.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.screen.error h1 {
+  text-align: center;
+  color: #E74C3C;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.screen.error p {
+  text-align: center;
+  color: #E74C3C;
+  font-size: 16px;
+  margin: 20px 0;
+  padding: 16px;
+  background: #FADBD8;
+  border-radius: 8px;
+  border-left: 4px solid #E74C3C;
+  max-width: 600px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets (portrait and smaller) - 768px and below */
+@media (max-width: 768px) {
+  .screen-header {
+    height: 100px;
+    padding: 0 30px;
+    margin-bottom: 20px;
+  }
+
+  .screen-header h1 {
+    font-size: 36px;
+    line-height: 44px;
+  }
+
+  .patient-list {
+    padding: 0 20px 30px;
+    gap: 20px;
+  }
+
+  .patient-button {
+    height: auto;
+    min-height: 160px;
+    padding: 24px 20px;
+    gap: 20px;
+    border-radius: 20px;
+  }
+
+  .patient-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 45px;
+  }
+
+  .patient-avatar-text {
+    font-size: 36px;
+    line-height: 44px;
+  }
+
+  .patient-name {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .patient-details {
+    font-size: 14px;
+    line-height: 17px;
+  }
+
+  .patient-tags {
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  .patient-tag {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 12px;
+    line-height: 15px;
+  }
+}
+
+/* Small tablets and large phones - 600px and below */
+@media (max-width: 600px) {
+  .screen-header {
+    height: 80px;
+    padding: 0 20px;
+    margin-bottom: 16px;
+  }
+
+  .screen-header h1 {
+    font-size: 28px;
+    line-height: 34px;
+  }
+
+  .patient-list {
+    padding: 0 16px 24px;
+    gap: 16px;
+  }
+
+  .patient-button {
+    min-height: 140px;
+    padding: 20px 16px;
+    gap: 16px;
+    border-radius: 16px;
+  }
+
+  .patient-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 35px;
+  }
+
+  .patient-avatar-text {
+    font-size: 28px;
+    line-height: 34px;
+  }
+
+  .patient-info {
+    gap: 8px;
+  }
+
+  .patient-name {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .patient-details {
+    font-size: 12px;
+    line-height: 15px;
+  }
+
+  .patient-tags {
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .patient-tag {
+    height: 26px;
+    padding: 0 10px;
+    font-size: 11px;
+    line-height: 13px;
+    border-radius: 7px;
+  }
+}
+
+/* Very small phones - 400px and below */
+@media (max-width: 400px) {
+  .screen-header {
+    height: 70px;
+    padding: 0 16px;
+  }
+
+  .screen-header h1 {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .patient-list {
+    padding: 0 12px 20px;
+    gap: 12px;
+  }
+
+  .patient-button {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: auto;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .patient-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+  }
+
+  .patient-avatar-text {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .patient-name {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .patient-details {
+    font-size: 11px;
+    line-height: 14px;
+    word-break: break-word;
+  }
+
+  .patient-tag {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+}
+
