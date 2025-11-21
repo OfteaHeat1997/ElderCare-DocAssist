@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PatientSelectionScreen from './screens/PatientSelectionScreen';
+import PatientDashboardScreen from './screens/PatientDashboardScreen';
 import RecordingScreen from './screens/RecordingScreen';
 import './App.css';
 
@@ -10,13 +11,23 @@ function App() {
   // Handle patient selection
   const handlePatientSelect = (patient) => {
     setSelectedPatient(patient);
-    setCurrentScreen('recording');
+    setCurrentScreen('dashboard');
   };
 
-  // Handle back button
-  const handleBack = () => {
+  // Handle back from dashboard to patient list
+  const handleBackToDashboard = () => {
+    setCurrentScreen('dashboard');
+  };
+
+  // Handle back from dashboard to patient selection
+  const handleBackToPatientList = () => {
     setCurrentScreen('patientSelection');
     setSelectedPatient(null);
+  };
+
+  // Handle start recording from dashboard
+  const handleStartRecording = () => {
+    setCurrentScreen('recording');
   };
 
   return (
@@ -25,8 +36,19 @@ function App() {
         <PatientSelectionScreen onPatientSelect={handlePatientSelect} />
       )}
 
+      {currentScreen === 'dashboard' && selectedPatient && (
+        <PatientDashboardScreen
+          patient={selectedPatient}
+          onBack={handleBackToPatientList}
+          onStartRecording={handleStartRecording}
+        />
+      )}
+
       {currentScreen === 'recording' && selectedPatient && (
-        <RecordingScreen patient={selectedPatient} onBack={handleBack} />
+        <RecordingScreen
+          patient={selectedPatient}
+          onBack={handleBackToDashboard}
+        />
       )}
     </div>
   );
