@@ -97,22 +97,6 @@ services:
     #           count: 1
     #           capabilities: [gpu]
 
-  # Backend (Java Spring Boot)
-  backend:
-    build:
-      context: ./backend/voiceverzorging-backend
-      dockerfile: Dockerfile
-    container_name: eldercare-backend
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    depends_on:
-      - database
-    networks:
-      - eldercare-network
-    restart: unless-stopped
-
   # Frontend (React Web App)
   frontend:
     build:

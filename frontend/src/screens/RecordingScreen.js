@@ -1,23 +1,18 @@
 import React, { useState, useRef } from 'react';
-import { startRecording, uploadAudio, completeRecording, generateSOAPNote } from '../services/api';
+import { transcribeAudio } from '../services/api';
 import './RecordingScreen.css';
 
 function RecordingScreen({ patient, onBack }) {
   const [isRecording, setIsRecording] = useState(false);
-  const [sessionId, setSessionId] = useState(null);
   const [transcription, setTranscription] = useState('');
-  const [soapNote, setSoapNote] = useState(null);
   const [status, setStatus] = useState('');
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
   const handleStartRecording = async () => {
     try {
-      setStatus('Starting recording session...');
-
-      // Start recording session with backend
-      const session = await startRecording(patient.id);
-      setSessionId(session.sessionId);
+      setStatus('Starting recording...');
+      setTranscription('');
 
       // Start browser audio recording
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -32,7 +27,7 @@ function RecordingScreen({ patient, onBack }) {
       setStatus('Recording in progress...');
     } catch (error) {
       console.error('Error starting recording:', error);
-      setStatus('Error: Could not start recording. Check if backend is running.');
+      setStatus('Error: Could not access microphone.');
     }
   };
 
@@ -46,24 +41,21 @@ function RecordingScreen({ patient, onBack }) {
         // Create audio blob
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
 
-        setStatus('Uploading audio to Whisper...');
-        // Upload to backend
-        await uploadAudio(sessionId, audioBlob);
+        setStatus('Sending to Whisper for transcription...');
 
-        setStatus('Transcribing audio...');
-        // Complete recording and get transcription
-        const result = await completeRecording(sessionId);
-        setTranscription(result.transcriptionText);
+        // Send to backend for transcription
+        const result = await transcribeAudio(audioBlob, patient.id);
 
-        setStatus('Generating SOAP note...');
-        // Generate SOAP note
-        const soap = await generateSOAPNote(result.id);
-        setSoapNote(soap);
-
+        setTranscription(result.text || result.transcriptionText || 'No transcription available');
         setStatus('Complete!');
 
         // Clean up
         audioChunksRef.current = [];
+
+        // Stop all audio tracks
+        if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+          mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        }
       } catch (error) {
         console.error('Error processing recording:', error);
         setStatus('Error: ' + error.message);
@@ -98,44 +90,8 @@ function RecordingScreen({ patient, onBack }) {
 
       {transcription && (
         <div className="transcription">
-          <h3>Transcription:</h3>
+          <h3>Whisper Transcription (Dutch):</h3>
           <p>{transcription}</p>
-        </div>
-      )}
-
-      {soapNote && (
-        <div className="soap-note">
-          <h3>SOAP Note:</h3>
-          <div className="soap-content">
-            {soapNote.structuredData.symptoms && (
-              <div>
-                <strong>Symptoms:</strong>
-                <ul>
-                  {soapNote.structuredData.symptoms.map((symptom, i) => (
-                    <li key={i}>{symptom}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {soapNote.structuredData.observations && (
-              <div>
-                <strong>Observations:</strong>
-                <p>{soapNote.structuredData.observations}</p>
-              </div>
-            )}
-            {soapNote.structuredData.interventions && (
-              <div>
-                <strong>Interventions:</strong>
-                <p>{soapNote.structuredData.interventions}</p>
-              </div>
-            )}
-            {soapNote.structuredData.nextSteps && (
-              <div>
-                <strong>Next Steps:</strong>
-                <p>{soapNote.structuredData.nextSteps}</p>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

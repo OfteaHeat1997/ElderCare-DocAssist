@@ -100,3 +100,28 @@ export const generateSOAPNote = async (transcriptionId) => {
     throw error;
   }
 };
+
+// NEW: Direct transcription API (Tim's Whisper)
+export const transcribeAudio = async (audioBlob, patientId) => {
+  try {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.webm');
+    if (patientId) {
+      formData.append('patientId', patientId);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/transcriptions`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to transcribe audio');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error transcribing audio:', error);
+    throw error;
+  }
+};
