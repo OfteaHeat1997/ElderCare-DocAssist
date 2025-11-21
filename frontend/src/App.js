@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PatientSelectionScreen from './screens/PatientSelectionScreen';
 import RecordingScreen from './screens/RecordingScreen';
+import './App.css';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('patientSelection');
