@@ -1,8 +1,8 @@
 # Quick Start Guide
 
-Super simple guide to start the database viewer!
+Get ElderCare-DocAssist running in 5 minutes!
 
-## Step 1: Start Everything
+## Step 1: Start Docker Services
 
 Open terminal in project folder:
 
@@ -10,74 +10,56 @@ Open terminal in project folder:
 docker-compose up -d
 ```
 
-Wait 10-20 seconds for containers to start.
+Wait 30-60 seconds for containers to start.
 
-## Step 2: Open Database Viewer (GUI)
+## Step 2: Download AI Model (First Time Only)
 
-**Open your browser and go to:**
-
-```
-http://localhost:8080
+```bash
+docker exec eldercare-ollama ollama pull qwen2.5:3b
 ```
 
-You'll see SQLite Web (database viewer)!
+Wait a few minutes (~2GB download).
 
-**That's it! No login needed!** The database is already loaded automatically.
+## Step 3: Start Mobile App
 
-**Now you can see:**
-- ✅ All your tables (notes, vitals)
-- ✅ All data in nice tables
-- ✅ Run SQL queries
-- ✅ See graphs/charts of data
-- ✅ Export data as CSV/JSON
+```bash
+cd frontend
+npm install
+npx expo start
+```
 
-## Step 3: Check What's Running
+## Step 4: Open on Phone
+
+1. Install **Expo Go** app on your phone
+2. Scan QR code from terminal
+3. App opens on your phone!
+
+## That's It!
+
+**Now you can:**
+- See patient list
+- View patient details
+- Record voice notes (Dutch)
+- Get AI transcription (Whisper)
+- Generate SOAP notes (Ollama)
+
+## Check Services Are Running
 
 ```bash
 docker ps
 ```
 
 You should see:
-- `eldercare-db-viewer` (port 8080) ← Database GUI
-- `eldercare-ollama` (port 11434) ← AI model
-- `eldercare-backend` (port 3000) ← API (when you build it)
+- `eldercare-backend` (port 8080) - API + Whisper
+- `eldercare-database` (port 5433) - PostgreSQL
+- `eldercare-ollama` (port 11434) - SOAP AI
+- `eldercare-db-admin` (port 5050) - Database viewer
 
-## Using the Database Viewer
+## View Database (Optional)
 
-### View All Patient Notes:
-
-1. Click on `notes` table
-2. See all SOAP notes!
-
-### View Vitals:
-
-1. Click on `vitals` table
-2. See blood pressure, temperature, heart rate
-
-### Run Custom Queries:
-
-1. Click "SQL command" at top
-2. Try this:
-
-```sql
-SELECT
-    n.id,
-    n.S_text,
-    v.systolic_mmHg,
-    v.temperature_c
-FROM notes n
-LEFT JOIN vitals v ON n.id = v.note_id;
-```
-
-3. Click "Execute"
-4. See results!
-
-### Export Data:
-
-1. Select table
-2. Click "Export"
-3. Choose format (CSV, SQL, etc.)
-4. Download!
+Open http://localhost:5050
+- Email: admin@example.com
+- Password: admin
 
 ## Stop Everything
 
@@ -85,35 +67,20 @@ LEFT JOIN vitals v ON n.id = v.note_id;
 docker-compose down
 ```
 
-## Restart Everything
-
-```bash
-docker-compose restart
-```
-
 ## Troubleshooting
 
-**Can't connect to http://localhost:8080?**
-- Wait 20 more seconds
-- Check if running: `docker ps`
-- Restart: `docker-compose restart db-viewer`
+**App not connecting?**
+- Phone and computer must be on same WiFi
+- Restart Expo: `npx expo start --clear`
 
-**Database viewer shows empty?**
-- Check file exists: `ls database/eldercare_dev.db`
-- Restart viewer: `docker-compose restart db-viewer`
+**Transcription not working?**
+- Check backend: `docker logs eldercare-backend`
+- First transcription takes 10-20 seconds
 
-**Port 8080 already in use?**
-Edit `docker-compose.yml` and change `8080:8080` to `8081:8080`, then use `http://localhost:8081`
-
-## What Your Team Sees
-
-**Everyone who runs `docker-compose up` gets:**
-- ✅ Same database viewer at http://localhost:8080
-- ✅ Same data (if using shared setup script)
-- ✅ Same tools
-
-Perfect for demos and teamwork!
+**SOAP not generating?**
+- Check Ollama: `docker exec eldercare-ollama ollama list`
+- Should show `qwen2.5:3b`
 
 ---
 
-**Next:** Check `DOCKER_SETUP.md` for full Docker guide
+**Full guide:** See `DOCKER_SETUP.md`

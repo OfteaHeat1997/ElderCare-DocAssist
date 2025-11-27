@@ -4,33 +4,35 @@ Student project: Voice-to-text documentation system for elderly care professiona
 
 ## Project Overview
 
-A web application that helps nurses document patient care efficiently:
-- Record voice notes via browser microphone
+A mobile app that helps nurses document patient care efficiently:
+- Record voice notes via phone microphone
 - Automatic transcription using OpenAI Whisper (Dutch language)
 - View patient information and medical history
-- Generate SOAP notes from transcriptions (future feature)
+- Generate SOAP notes from transcriptions using Ollama AI
 
 **Tech Stack:**
-- Frontend: React (JavaScript)
+- Frontend: React Native (Expo) - Mobile app
 - Backend: Java Spring Boot + Python Whisper
 - Database: PostgreSQL
-- AI: OpenAI Whisper for transcription, Ollama for SOAP generation
+- AI: OpenAI Whisper for transcription, Ollama (qwen2.5:3b) for SOAP generation
 - Deployment: Docker Compose
 
 ## Project Structure
 
 ```
 ElderCare-DocAssist/
-├── frontend/                          # React web application
-│   ├── src/
-│   │   ├── screens/                   # Main UI screens
-│   │   │   ├── PatientSelectionScreen.js     # Patient list
-│   │   │   ├── PatientDashboardScreen.js     # Patient details
-│   │   │   └── RecordingScreen.js            # Audio recording & transcription
-│   │   ├── services/
-│   │   │   └── api.js                 # Backend API calls
-│   │   └── App.js                     # Main app component
-│   ├── public/
+├── frontend/                          # Expo React Native mobile app
+│   ├── app/                           # Expo Router screens
+│   │   ├── index.js                   # Patient selection
+│   │   ├── patient/[id].js            # Patient dashboard
+│   │   └── record.js                  # Recording screen
+│   ├── screens/                       # Screen components
+│   │   ├── PatientSelectionScreen.js  # Patient list
+│   │   ├── PatientDetailScreen.js     # Patient details + medical info
+│   │   └── RecordingScreen.js         # Audio recording & transcription
+│   ├── services/
+│   │   ├── api.js                     # Backend API calls (Whisper)
+│   │   └── ollama.js                  # Ollama API calls (SOAP)
 │   └── package.json
 │
 ├── backend/
@@ -43,7 +45,9 @@ ElderCare-DocAssist/
 │       └── whisper/
 │           └── transcribe.py          # Whisper transcription script
 │
-└── docker-compose.yml                 # Complete application setup
+├── database/                          # Database setup and docs
+│
+└── docker-compose.yml                 # Backend services setup
 ```
 
 ## Getting Started
@@ -51,8 +55,9 @@ ElderCare-DocAssist/
 ### Prerequisites
 
 - Docker Desktop installed (Windows/Mac/Linux)
-- At least 4GB RAM available for Docker
-- Port 3001 (frontend), 8080 (backend), 5433 (database) available
+- Node.js 18+ installed
+- Expo Go app on your phone (for testing)
+- At least 8GB RAM (for Ollama with qwen2.5:3b model)
 
 ### Installation & Setup
 
@@ -62,105 +67,52 @@ ElderCare-DocAssist/
    cd ElderCare-DocAssist
    ```
 
-2. **Start all services with Docker**
+2. **Start backend services with Docker**
    ```bash
    docker-compose up -d
    ```
 
-   This command will:
-   - Build the frontend React app
-   - Build the backend Spring Boot app with Whisper
-   - Start PostgreSQL database
-   - Download Whisper AI model (first time only, ~150MB)
+   This starts:
+   - PostgreSQL database (port 5433)
+   - Java Spring Boot backend with Whisper (port 8080)
+   - Ollama for SOAP generation (port 11434)
+   - pgAdmin database viewer (port 5050)
 
-3. **Wait for services to start** (30-60 seconds)
+3. **Download Ollama model** (first time only)
    ```bash
-   # Check if all containers are running
-   docker ps
+   docker exec eldercare-ollama ollama pull qwen2.5:3b
+   ```
+   Wait a few minutes for the model to download (~2GB).
 
-   # You should see:
-   # - eldercare-frontend (port 3001)
-   # - eldercare-backend (port 8080)
-   # - eldercare-database (port 5433)
+4. **Start the Expo mobile app**
+   ```bash
+   cd frontend
+   npm install
+   npx expo start
    ```
 
-4. **Open the application**
-   - Frontend: http://localhost:3001
-   - Backend API: http://localhost:8080
-   - Database Admin: http://localhost:5050 (pgAdmin)
+5. **Scan QR code** with Expo Go app on your phone
 
-### First Time Usage
+### Testing the App
 
-1. Open http://localhost:3001 in your browser
-2. You'll see a list of test patients
-3. Click on a patient to view their dashboard
-4. Click the red record button to start recording
-5. Allow microphone access when prompted
-6. Speak in Dutch (Whisper is configured for Dutch)
-7. Click "Stop Recording" to transcribe
+1. Open Expo Go app on your phone
+2. Scan the QR code from terminal
+3. You'll see a list of patients
+4. Tap a patient to view their dashboard
+5. Tap "Start opname" (red button) to record
+6. Speak in Dutch
+7. Tap "Stop" - Whisper transcribes your audio
+8. Tap "Generate SOAP Note" - Ollama creates SOAP report
 
-### Troubleshooting
+## Services & Ports
 
-**Frontend not loading?**
-```bash
-# Restart frontend container
-docker restart eldercare-frontend
-
-# View frontend logs
-docker logs eldercare-frontend
-```
-
-**Backend errors?**
-```bash
-# Check backend logs
-docker logs eldercare-backend
-
-# Restart backend
-docker restart eldercare-backend
-```
-
-**Database connection issues?**
-```bash
-# Check database is running
-docker ps | grep database
-
-# Restart database
-docker restart eldercare-database
-```
-
-**Whisper transcription failing?**
-- First transcription takes 10-20 seconds (downloading model)
-- Check backend logs: `docker logs eldercare-backend`
-- Ensure Python and ffmpeg are installed in backend container
-
-## Development
-
-### Making Changes to Frontend
-
-1. Edit files in `frontend/src/`
-2. Rebuild and restart frontend:
-   ```bash
-   docker-compose up -d --build frontend
-   ```
-3. Refresh browser (Ctrl + Shift + R)
-
-### Making Changes to Backend
-
-1. Edit files in `backend/voiceverzorging-backend/src/`
-2. Rebuild and restart backend:
-   ```bash
-   docker-compose up -d --build backend
-   ```
-
-### Stopping the Application
-
-```bash
-# Stop all containers
-docker-compose down
-
-# Stop and remove all data (database will be reset)
-docker-compose down -v
-```
+| Service | Port | Description |
+|---------|------|-------------|
+| Backend | 8080 | Java Spring Boot + Whisper |
+| Database | 5433 | PostgreSQL |
+| Ollama | 11434 | AI for SOAP notes |
+| pgAdmin | 5050 | Database viewer |
+| Expo | 8081 | Metro bundler (development) |
 
 ## API Endpoints
 
@@ -168,25 +120,82 @@ docker-compose down -v
 - `GET /v1/patients` - Get all patients
 - `GET /v1/patients/{id}` - Get single patient
 
-### Transcription
+### Transcription (Whisper)
 - `POST /v1/transcriptions` - Upload audio file, returns transcription
   - Form data: `audio` (file), `patientId` (optional)
   - Returns: `{ text: "transcribed text", ... }`
 
-### Documentation (Future)
-- `POST /v1/documentation/generate` - Generate SOAP note from transcription
+### SOAP Generation (Ollama - Frontend Direct)
+- Ollama API: `POST http://localhost:11434/api/generate`
+- Called directly from frontend (not through backend)
+
+## Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│   Phone App     │     │  Docker         │
+│   (Expo)        │     │  Services       │
+│                 │     │                 │
+│  ┌───────────┐  │     │  ┌───────────┐  │
+│  │ Recording │──┼─────┼─►│ Backend   │  │
+│  │ Screen    │  │     │  │ (Whisper) │  │
+│  └───────────┘  │     │  └───────────┘  │
+│       │         │     │       │         │
+│       ▼         │     │       ▼         │
+│  ┌───────────┐  │     │  ┌───────────┐  │
+│  │ SOAP      │──┼─────┼─►│ Ollama    │  │
+│  │ Button    │  │     │  │ (AI)      │  │
+│  └───────────┘  │     │  └───────────┘  │
+│                 │     │       │         │
+│                 │     │       ▼         │
+│                 │     │  ┌───────────┐  │
+│                 │     │  │ Database  │  │
+│                 │     │  │(PostgreSQL│  │
+│                 │     │  └───────────┘  │
+└─────────────────┘     └─────────────────┘
+```
 
 ## Team Members
 
-- Maria - Frontend Development
-- Tim - Backend Development & AI Integration
-- Jussuf - [Role]
+- Maria - Project Lead
+- Tim - Backend Development & Whisper Integration
+- Yusuf - Frontend Development (Expo/React Native)
 
-## Future Features
+## Troubleshooting
 
-- [ ] Save transcriptions to database
-- [ ] Generate SOAP notes from transcriptions
-- [ ] Edit and review SOAP notes
-- [ ] Export to ZIB/BGZ formats
-- [ ] User authentication
-- [ ] Mobile app version
+**Phone can't connect to backend?**
+- Make sure phone and computer are on same WiFi
+- Expo automatically uses your computer's IP
+
+**Whisper transcription failing?**
+- First transcription takes 10-20 seconds (loading model)
+- Check backend logs: `docker logs eldercare-backend`
+
+**Ollama SOAP not working?**
+- Check Ollama is running: `docker ps | grep ollama`
+- Check model is downloaded: `docker exec eldercare-ollama ollama list`
+- For phone: Update IP in `frontend/services/ollama.js`
+
+**Expo not starting?**
+- Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
+- Clear cache: `npx expo start --clear`
+
+## Commands Cheat Sheet
+
+```bash
+# Start backend services
+docker-compose up -d
+
+# Stop backend services
+docker-compose down
+
+# View logs
+docker logs eldercare-backend
+docker logs eldercare-ollama
+
+# Start Expo app
+cd frontend && npx expo start
+
+# Pull Ollama model
+docker exec eldercare-ollama ollama pull qwen2.5:3b
+```
