@@ -1,6 +1,7 @@
 
-# ElderCare-DocAssist - Complete Docker Compose
-# Runs everything: Database, Backend (Java + Python Whisper), Frontend, Ollama
+# ElderCare-DocAssist - Docker Compose
+# Runs: Database, Backend (Java + Python Whisper), Ollama
+# Note: Frontend is now Expo (React Native) - run separately with 'npx expo start'
 
 services:
   # PostgreSQL Database
@@ -97,30 +98,8 @@ services:
     #           count: 1
     #           capabilities: [gpu]
 
-  # Frontend (React Web App)
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: eldercare-frontend
-    ports:
-      - "3001:3001"
-    volumes:
-      # Share frontend code (for development hot reload)
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-      # Backend API URL (internal Docker network)
-      - REACT_APP_API_URL=http://backend:8080
-      # For browser access (external)
-      - REACT_APP_PUBLIC_API_URL=http://localhost:8080
-    depends_on:
-      - backend
-    networks:
-      - eldercare-network
-    restart: unless-stopped
+  # Frontend is now Expo (React Native mobile app)
+  # Run separately with: cd frontend && npx expo start
 
 networks:
   eldercare-network:
