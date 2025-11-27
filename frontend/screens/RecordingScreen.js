@@ -4,6 +4,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { Audio } from "expo-av";
 import ResponsiveText from "../components/ResponsiveText";
 import { transcribeAudio } from "../services/api";
+import { generateSOAPNote } from "../services/ollama";
 import { responsiveSize, responsivePadding } from "../lib/responsive";
 
 export default function RecordingScreen() {
@@ -12,8 +13,10 @@ export default function RecordingScreen() {
 
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
+  const [soapNote, setSoapNote] = useState('');
   const [status, setStatus] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
   const recordingRef = useRef(null);
 
   const handleStartRecording = async () => {
@@ -70,6 +73,7 @@ export default function RecordingScreen() {
       setTranscription(result.text || result.transcriptionText || 'No transcription available');
       setStatus('Transcription Complete!');
       setIsProcessing(false);
+      setSoapNote(''); // Reset SOAP note for new recording
 
       // Clean up
       recordingRef.current = null;
@@ -82,6 +86,25 @@ export default function RecordingScreen() {
       console.error('Error processing recording:', error);
       setStatus('Error: ' + error.message);
       setIsProcessing(false);
+    }
+  };
+
+  // Generate SOAP note from transcription using Ollama
+  const handleGenerateSOAP = async () => {
+    if (!transcription) return;
+
+    setIsGeneratingSOAP(true);
+    setStatus('Generating SOAP note with AI...');
+
+    try {
+      const soap = await generateSOAPNote(transcription);
+      setSoapNote(soap);
+      setStatus('SOAP note generated!');
+    } catch (error) {
+      console.error('Error generating SOAP:', error);
+      setStatus('Error: Could not generate SOAP note. Is Ollama running?');
+    } finally {
+      setIsGeneratingSOAP(false);
     }
   };
 
@@ -254,6 +277,57 @@ export default function RecordingScreen() {
           </ResponsiveText>
           <ResponsiveText style={{ lineHeight: 24 }}>
             {transcription}
+          </ResponsiveText>
+        </View>
+      )}
+
+      {/* Generate SOAP Button */}
+      {transcription && !soapNote && (
+        <TouchableOpacity
+          onPress={handleGenerateSOAP}
+          disabled={isGeneratingSOAP}
+          style={{
+            backgroundColor: isGeneratingSOAP ? "#999" : "#2196F3",
+            paddingVertical: responsiveSize(16, 22),
+            borderRadius: 12,
+            marginTop: responsiveSize(16, 24),
+            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "center",
+          }}
+        >
+          {isGeneratingSOAP && (
+            <ActivityIndicator color="white" style={{ marginRight: 10 }} />
+          )}
+          <ResponsiveText style={{ color: "white", fontWeight: "700" }}>
+            {isGeneratingSOAP ? "Generating..." : "Generate SOAP Note"}
+          </ResponsiveText>
+        </TouchableOpacity>
+      )}
+
+      {/* SOAP Note Result */}
+      {soapNote && (
+        <View
+          style={{
+            marginTop: responsiveSize(20, 30),
+            padding: responsiveSize(16, 24),
+            backgroundColor: "white",
+            borderRadius: 12,
+            borderLeftWidth: 4,
+            borderLeftColor: "#2196F3",
+          }}
+        >
+          <ResponsiveText
+            style={{
+              fontWeight: "bold",
+              marginBottom: responsiveSize(10, 15),
+              color: "#1565C0",
+            }}
+          >
+            SOAP Report (AI Generated):
+          </ResponsiveText>
+          <ResponsiveText style={{ lineHeight: 24 }}>
+            {soapNote}
           </ResponsiveText>
         </View>
       )}
