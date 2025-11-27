@@ -5,6 +5,7 @@ Student project: Voice-to-text documentation system for elderly care professiona
 ## Project Overview
 
 A mobile app that helps nurses document patient care efficiently:
+- **Nurse Login** - Email + password authentication
 - Record voice notes via phone microphone
 - Automatic transcription using OpenAI Whisper (Dutch language)
 - View patient information and medical history
@@ -23,9 +24,12 @@ A mobile app that helps nurses document patient care efficiently:
 ElderCare-DocAssist/
 ├── frontend/                          # Expo React Native mobile app
 │   ├── app/                           # Expo Router screens
-│   │   ├── index.js                   # Patient selection
+│   │   ├── login.js                   # Login screen (email + password)
+│   │   ├── index.js                   # Home screen (patient selection)
 │   │   ├── patient/[id].js            # Patient dashboard
 │   │   └── record.js                  # Recording screen
+│   ├── context/
+│   │   └── AuthContext.js             # Authentication state management
 │   ├── screens/                       # Screen components
 │   │   ├── PatientSelectionScreen.js  # Patient list
 │   │   ├── PatientDetailScreen.js     # Patient details + medical info
@@ -34,6 +38,9 @@ ElderCare-DocAssist/
 │   │   ├── api.js                     # Backend API calls (Whisper)
 │   │   └── ollama.js                  # Ollama API calls (SOAP)
 │   └── package.json
+│
+├── docs/
+│   └── AUTHENTICATION_GUIDE.md        # Guide for Tim to connect backend auth
 │
 ├── backend/
 │   └── voiceverzorging-backend/       # Spring Boot backend
@@ -97,12 +104,18 @@ ElderCare-DocAssist/
 
 1. Open Expo Go app on your phone
 2. Scan the QR code from terminal
-3. You'll see a list of patients
-4. Tap a patient to view their dashboard
-5. Tap "Start opname" (red button) to record
-6. Speak in Dutch
-7. Tap "Stop" - Whisper transcribes your audio
-8. Tap "Generate SOAP Note" - Ollama creates SOAP report
+3. **Login with demo account:**
+   - Email: `maria@eldercare.nl`
+   - Password: `wachtwoord123`
+   - (Other accounts: `jan@eldercare.nl`, `admin@eldercare.nl`)
+4. You'll see the home screen with "Welkom [Name]"
+5. Tap "Patient selecteren" to see patient list
+6. Tap a patient to view their dashboard
+7. Tap "Start opname" (red button) to record
+8. Speak in Dutch
+9. Tap "Stop" - Whisper transcribes your audio
+10. Tap "Generate SOAP Note" - Ollama creates SOAP report
+11. Tap logout icon (top right) to return to login
 
 ## Services & Ports
 

@@ -1,11 +1,19 @@
 import { View, TouchableOpacity } from "react-native";
-import { Link } from "expo-router";
+import { Link, Redirect } from "expo-router";
 import ResponsiveView from "../components/ResponsiveView";
 import ResponsiveText from "../components/ResponsiveText";
 import { responsiveSize, responsivePadding, isTablet } from "../lib/responsive";
-import { Ionicons } from "@expo/vector-icons"; // ← toegevoegd
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomeScreen() {
+  const { user, isLoggedIn, logout } = useAuth();
+
+  // Redirect to login if not logged in
+  if (!isLoggedIn) {
+    return <Redirect href="/login" />;
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* HEADER */}
@@ -18,12 +26,26 @@ export default function HomeScreen() {
           borderBottomRightRadius: 20,
         }}
       >
-        <ResponsiveText style={{ fontWeight: "bold" }}>
-          Hallo Kim 👋
-        </ResponsiveText>
-        <ResponsiveText style={{ marginTop: 5 }}>
-          Wat wil je vandaag doen?
-        </ResponsiveText>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View>
+            <ResponsiveText style={{ fontWeight: "bold" }}>
+              Welkom {user?.name || "Verpleegkundige"}
+            </ResponsiveText>
+            <ResponsiveText style={{ marginTop: 5 }}>
+              Wat wil je vandaag doen?
+            </ResponsiveText>
+          </View>
+          <TouchableOpacity
+            onPress={logout}
+            style={{
+              backgroundColor: "rgba(0,0,0,0.1)",
+              padding: responsiveSize(10, 14),
+              borderRadius: 10,
+            }}
+          >
+            <Ionicons name="log-out-outline" size={responsiveSize(24, 32)} color="#333" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* CONTENT AREA */}
@@ -56,44 +78,6 @@ export default function HomeScreen() {
               </ResponsiveText>
             </TouchableOpacity>
           </Link>
-
-          {/* QUICK ACTION 2 */}
-          {/* <Link href="/record" asChild>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#E53935",
-                paddingVertical: responsiveSize(20, 28),
-                borderRadius: 16,
-                alignItems: "center",
-              }}
-            >
-              <Ionicons name="mic-outline" size={24} color="white" />
-              <ResponsiveText
-                style={{ color: "white", fontWeight: "600", marginTop: 6 }}
-              >
-                Nieuwe opname
-              </ResponsiveText>
-            </TouchableOpacity>
-          </Link> */}
-
-          {/* QUICK ACTION 3 */}
-          {/* <Link href="/review" asChild>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#8E24AA",
-                paddingVertical: responsiveSize(20, 28),
-                borderRadius: 16,
-                alignItems: "center",
-              }}
-            >
-              <Ionicons name="document-text-outline" size={24} color="white" />
-              <ResponsiveText
-                style={{ color: "white", fontWeight: "600", marginTop: 6 }}
-              >
-                Notities bekijken
-              </ResponsiveText>
-            </TouchableOpacity>
-          </Link> */}
         </View>
       </ResponsiveView>
     </View>
